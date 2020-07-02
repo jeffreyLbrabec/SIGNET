@@ -44,7 +44,9 @@ hippocampus_volume_pvals <- read_table(here("data", "hipp_genes.genes.out"),
 
 ```
 
+**DON'T RUN**
 ```{r signet run with adni data}
+######DON'T RUN
 adni_hippocampal_volume_signet_results_4_nets <- SIGNET(here("data", "hipp_genes_for_signet.txt"),
                                                         network_dir = here("hb_top_4_brain_nets"),
                                                         iters = 20000,
@@ -62,6 +64,7 @@ adni_hippocampal_volume_signet_results_16_nets <- SIGNET(here("data", "hipp_gene
 write_rds(adni_hippocampal_volume_signet_results_16_nets, here("results", "adni_hippocampal_volume_signet_results_16_nets.rds"))
 
 ```
+
 
 ```{r read_in_and_process_data}
 adni_hippocampal_volume_signet_results_4_nets <- read_rds(here("results", "adni_hippocampal_volume_signet_results_4_nets.rds"))
@@ -118,6 +121,8 @@ adni_signet_4_nets_gene_comparison_plot <- gene_rank_plotr(score_tab = adni_sign
     legend=list(title=list(text='<b> Combined Score </b>'))
     )
 write_rds(adni_signet_4_nets_gene_comparison_plot, here("results", "adni_signet_4_nets_gene_comparison_plot.rds"))
+
+#Run this line to get the plot
 adni_signet_4_nets_gene_comparison_plot <- read_rds(here("results", "adni_signet_4_nets_gene_comparison_plot.rds"))
 
 
@@ -131,6 +136,8 @@ adni_signet_16_nets_gene_comparison_plot <- gene_rank_plotr(score_tab = adni_sig
     legend=list(title=list(text='<b> Combined Score </b>'))
     )
 write_rds(adni_signet_16_nets_gene_comparison_plot, here("results", "adni_signet_16_nets_gene_comparison_plot.rds"))
+
+#Run this line to get the plot
 adni_signet_16_nets_gene_comparison_plot <- read_rds(here("results", "adni_signet_16_nets_gene_comparison_plot.rds"))
 
 ```
@@ -139,11 +146,15 @@ adni_signet_16_nets_gene_comparison_plot <- read_rds(here("results", "adni_signe
 adni_signet_4_nets_go_comparison_plot <- go_comparison_plotr(score_tab = adni_signet_4_nets_res, gene_col = "Gene", pval_col = "logGWASp", score_comp_col = "logFDR", num_nets = "4")
 
 write_rds(adni_signet_4_nets_go_comparison_plot, here("results", "adni_signet_4_nets_go_comparison_plot.rds"))
+
+#Run this line to get the plot
 adni_signet_4_nets_go_comparison_plot <- read_rds(here("results", "adni_signet_4_nets_go_comparison_plot.rds"))
 
 adni_signet_16_nets_go_comparison_plot <- go_comparison_plotr(score_tab = adni_signet_16_nets_res, gene_col = "Gene", pval_col = "logGWASp", score_comp_col = "logFDR", num_nets = "16")
 
 write_rds(adni_signet_16_nets_go_comparison_plot, here("results", "adni_signet_16_nets_go_comparison_plot.rds"))
+
+#Run this line to get the plot
 adni_signet_16_nets_go_comparison_plot <- read_rds(here("results", "adni_signet_16_nets_go_comparison_plot.rds"))
 ```
 
