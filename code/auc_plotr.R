@@ -89,6 +89,7 @@ auc_plotr <- function(score_tab = NULL,
     scale_x_reordered() +
     labs(x = "",
          title = title) +
+    expand_limits(y = 1) +
     theme_light() +
     theme(legend.position = "none")
   

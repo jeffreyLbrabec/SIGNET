@@ -24,9 +24,8 @@ library('R.utils')
 
 ```{r source_code}
 code.dir <- here('code')
-sourceDirectory(code.dir)
+sourceDirectory(here('code'))
 ```
-
 
 ```{r read in pvals and change col headers}
 
