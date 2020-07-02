@@ -1,0 +1,190 @@
+---
+title: "Signet NBFP Figures"
+author: "Jeff Brabec"
+date: "7/2/2020"
+output: html_document
+---
+
+```{r setup}
+library('tidyverse')
+library('Matrix')
+library('Rcpp')
+library('BayesLogit')
+library('here')
+library('igraph')
+library('pROC')
+library('disgenet2r')
+library('magrittr')
+library('gprofiler2')
+library('plotly')
+library('patchwork')
+library('tidytext')
+library('R.utils')
+```
+
+```{r source_code}
+code.dir <- here('code')
+sourceDirectory(code.dir)
+```
+
+
+```{r read in pvals and change col headers}
+
+hippocampus_volume_pvals <- read_table(here("data", "hipp_genes.genes.out"),
+                                       col_names = TRUE) %>% 
+  mutate(across(starts_with("GENE"), as.character)) %>%
+  mutate(across(starts_with("CHR"), as.character)) %>% 
+  dplyr::select(chromosome = CHR, 
+         start = START, 
+         end  = STOP, 
+         gene_symbol = GENE, 
+         numSnps = NSNPS, 
+         pvalue = P) %>% 
+  mutate(chromosome = paste("chr", .$chromosome, sep = ""))
+
+```
+
+```{r signet run with adni data}
+adni_hippocampal_volume_signet_results_4_nets <- SIGNET(here("data", "hipp_genes_for_signet.txt"),
+                                                        network_dir = here("hb_top_4_brain_nets"),
+                                                        iters = 20000,
+                                                        remove_HLA = TRUE,
+                                                        edge_threshold = 0)
+write_rds(adni_hippocampal_volume_signet_results_4_nets, here("results", "adni_hippocampal_volume_signet_results_4_nets.rds"))
+
+
+adni_hippocampal_volume_signet_results_16_nets <- SIGNET(here("data", "hipp_genes_for_signet.txt"), 
+                                                         network_dir = here("hb_top_brain_nets"),
+                                                         iters = 20000,
+                                                         remove_HLA = TRUE,
+                                                         edge_threshold = 0)
+
+write_rds(adni_hippocampal_volume_signet_results_16_nets, here("results", "adni_hippocampal_volume_signet_results_16_nets.rds"))
+
+```
+
+```{r read_in_and_process_data}
+adni_hippocampal_volume_signet_results_4_nets <- read_rds(here("results", "adni_hippocampal_volume_signet_results_4_nets.rds"))
+adni_hippocampal_volume_signet_results_16_nets <- read_rds(here("results", "adni_hippocampal_volume_signet_results_16_nets.rds"))
+
+
+adni_signet_4_nets_res <- adni_hippocampal_volume_signet_results_4_nets$data %>% 
+  mutate(across(Gene, as.character)) %>% 
+  mutate(logGWASp = -log10(pval),
+         logFDR = -log10(localFDR))
+
+adni_signet_4_nets_gconvert <- gconvert(adni_signet_4_nets_res$Gene,
+                                        organism = "hsapiens",
+                                        target = "ENTREZGENE",
+                                        numeric_ns = "ENTREZGENE_ACC") %>% 
+  filter(!duplicated(target), !duplicated(name), !duplicated(input)) %>% 
+  as_tibble() %>% 
+  dplyr::select(Gene = input, name) %>% 
+  mutate(across(Gene, as.character))
+
+adni_signet_4_nets_res_genes <- adni_signet_4_nets_res %>% 
+  inner_join(adni_signet_4_nets_gconvert, by = "Gene") %>% 
+  select(gene_name = name, logGWASp, logFDR)
+
+
+adni_signet_16_nets_res <- adni_hippocampal_volume_signet_results_16_nets$data %>% 
+  mutate(across(Gene, as.character)) %>% 
+  mutate(logGWASp = -log10(pval),
+         logFDR = -log10(localFDR)) 
+
+adni_signet_16_nets_gconvert <- gconvert(adni_signet_16_nets_res$Gene,
+                                        organism = "hsapiens",
+                                        target = "ENTREZGENE",
+                                        numeric_ns = "ENTREZGENE_ACC") %>% 
+  filter(!duplicated(target), !duplicated(name), !duplicated(input)) %>% 
+  as_tibble() %>% 
+  dplyr::select(Gene = input, name) %>% 
+  mutate(across(Gene, as.character))
+
+adni_signet_16_nets_res_genes <- adni_signet_16_nets_res %>% 
+  inner_join(adni_signet_16_nets_gconvert, by = "Gene") %>% 
+  select(gene_name = name, logGWASp, logFDR)
+
+
+```
+
+```{r gene_comparisons_plots}
+adni_signet_4_nets_gene_comparison_plot <- gene_rank_plotr(score_tab = adni_signet_4_nets_res_genes, 
+                                                           gene_col = "gene_name", 
+                                                           pval_col = "logGWASp",
+                                                           score_comp_col = "logFDR") %>% 
+  layout(
+    title = "Gene Rank by GWAS p-value, Signet FDR,\nand the Combined Ranking of the Two | 4 Networks",
+    legend=list(title=list(text='<b> Combined Score </b>'))
+    )
+write_rds(adni_signet_4_nets_gene_comparison_plot, here("results", "adni_signet_4_nets_gene_comparison_plot.rds"))
+adni_signet_4_nets_gene_comparison_plot <- read_rds(here("results", "adni_signet_4_nets_gene_comparison_plot.rds"))
+
+
+
+adni_signet_16_nets_gene_comparison_plot <- gene_rank_plotr(score_tab = adni_signet_16_nets_res_genes, 
+                                                           gene_col = "gene_name", 
+                                                           pval_col = "logGWASp",
+                                                           score_comp_col = "logFDR") %>% 
+  layout(
+    title = "Gene Rank by GWAS p-value, Signet FDR,\nand the Combined Ranking of the Two | 16 Networks",
+    legend=list(title=list(text='<b> Combined Score </b>'))
+    )
+write_rds(adni_signet_16_nets_gene_comparison_plot, here("results", "adni_signet_16_nets_gene_comparison_plot.rds"))
+adni_signet_16_nets_gene_comparison_plot <- read_rds(here("results", "adni_signet_16_nets_gene_comparison_plot.rds"))
+
+```
+
+```{r go_comparisons_plots}
+adni_signet_4_nets_go_comparison_plot <- go_comparison_plotr(score_tab = adni_signet_4_nets_res, gene_col = "Gene", pval_col = "logGWASp", score_comp_col = "logFDR", num_nets = "4")
+
+write_rds(adni_signet_4_nets_go_comparison_plot, here("results", "adni_signet_4_nets_go_comparison_plot.rds"))
+adni_signet_4_nets_go_comparison_plot <- read_rds(here("results", "adni_signet_4_nets_go_comparison_plot.rds"))
+
+adni_signet_16_nets_go_comparison_plot <- go_comparison_plotr(score_tab = adni_signet_16_nets_res, gene_col = "Gene", pval_col = "logGWASp", score_comp_col = "logFDR", num_nets = "16")
+
+write_rds(adni_signet_16_nets_go_comparison_plot, here("results", "adni_signet_16_nets_go_comparison_plot.rds"))
+adni_signet_16_nets_go_comparison_plot <- read_rds(here("results", "adni_signet_16_nets_go_comparison_plot.rds"))
+```
+
+```{r get disgenet genes}
+ad_disgenet <- disease2gene(disease = "C0002395",
+                            database = "ALL")
+ad_disgenet_results <- ad_disgenet@qresult %>% 
+  select(gene_symbol, score)
+```
+
+```{r auc plotting}
+adni_signet_4_nets_res_genes_comb_score <- adni_signet_4_nets_res_genes %>% 
+  rowwise() %>% 
+  mutate(comb_score = sum(logGWASp > .$logGWASp & logFDR > .$logFDR)) %>%
+  ungroup() %>%
+  mutate(comb_score = comb_score/n())
+
+adni_signet_16_nets_res_genes_comb_score <- adni_signet_16_nets_res_genes %>% 
+  rowwise() %>% 
+  mutate(comb_score = sum(logGWASp > .$logGWASp & logFDR > .$logFDR)) %>%
+  ungroup() %>%
+  mutate(comb_score = comb_score/n())
+
+adni_signet_4_nets_aucs <- auc_plotr(score_tab = adni_signet_4_nets_res_genes_comb_score,
+                                     gene_col = "gene_name",
+                                     pval_col = "logGWASp",
+                                     comp_score_col = "logFDR",
+                                     comb_score_col = "comb_score",
+                                     disgenet_genes = ad_disgenet_results,
+                                     conf_cutoffs = c(0.2, 0.3, 0.4, 0.5),
+                                     title = "SIGNET 4 Net Run AUC Comparison")
+ggsave(here("results", "adni_signet_4_nets_aucs.png"), plot = adni_signet_4_nets_aucs)
+
+adni_signet_16_nets_aucs <- auc_plotr(score_tab = adni_signet_16_nets_res_genes_comb_score,
+                                     gene_col = "gene_name",
+                                     pval_col = "logGWASp",
+                                     comp_score_col = "logFDR",
+                                     comb_score_col = "comb_score",
+                                     disgenet_genes = ad_disgenet_results,
+                                     conf_cutoffs = c(0.2, 0.3, 0.4, 0.5),
+                                     title = "SIGNET 16 Net Run AUC Comparison")
+ggsave(here("results", "adni_signet_16_nets_aucs.png"), plot = adni_signet_16_nets_aucs)
+```
+

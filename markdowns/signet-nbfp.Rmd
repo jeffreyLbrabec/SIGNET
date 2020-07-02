@@ -1,0 +1,372 @@
+---
+title: "SIGNET NBFP"
+author: "Jeff Brabec"
+date: "6/28/2020"
+output: html_document
+---
+
+```{r setup}
+library('tidyverse')
+library('Matrix')
+library('Rcpp')
+library('BayesLogit')
+library('here')
+library('igraph')
+library('pROC')
+library('disgenet2r')
+library('magrittr')
+library('gprofiler2')
+library('plotly')
+library('patchwork')
+library('tidytext')
+```
+
+```{r}
+ms_trial_result <- SIGNET(here("examples", "multiple_sclerosis.txt"), 
+                          network_dir = here("high_level_nets"),
+                          iters = 20000,
+                          remove_HLA = TRUE,
+                          edge_threshold = 0)
+```
+
+```{r download brain networks}
+hum_hippocampus.net <- here("data", "hippocampus_top.Rdata")
+if(!file.exists(hum_hippocampus.net)){
+    download.tissue.net(tissue = "hippocampus", organism = "human", project.dir = data.dir)
+}
+
+hum_frontal_lobe.net <- here("data", "frontal_lobe_top.Rdata")
+if(!file.exists(hum_frontal_lobe.net)){
+    download.tissue.net(tissue = "frontal_lobe", organism = "human", project.dir = data.dir)
+    }
+
+hum_parietal_lobe.net <- here("data", "parietal_lobe_top.Rdata")
+if(!file.exists(hum_parietal_lobe.net)){
+    download.tissue.net(tissue = "parietal_lobe", organism = "human", project.dir = data.dir)
+}
+
+hum_temporal_lobe.net <- here("data", "temporal_lobe_top.Rdata")
+if(!file.exists(hum_temporal_lobe.net)){
+    download.tissue.net(tissue = "temporal_lobe", organism = "human", project.dir = data.dir)
+}
+
+hum_cerebellum.net <- here("data", "cerebellum_top.Rdata")
+if(!file.exists(hum_cerebellum.net)){
+  download.tissue.net(tissue = "cerebellum", organism = "human", project.dir = data.dir)
+}
+
+hum_brain.net <- here("data", "brain_top.Rdata")
+if(!file.exists(hum_brain.net)){
+    download.tissue.net(tissue = "brain", organism = "human", project.dir = data.dir)
+}
+
+hum_neuron.net <- here("data", "neuron_top.Rdata")
+if(!file.exists(hum_neuron.net)){
+    download.tissue.net(tissue = "neuron", organism = "human", project.dir = data.dir)
+}
+
+hum_glia.net <- here("data", "glia_top.Rdata")
+if(!file.exists(hum_glia.net)){
+    download.tissue.net(tissue = "glia", organism = "human", project.dir = data.dir)
+}
+
+hum_astrocyte.net <- here("data", "astrocyte_top.Rdata")
+if(!file.exists(hum_astrocyte.net)){
+    download.tissue.net(tissue = "astrocyte", organism = "human", project.dir = data.dir)
+}
+
+hum_caudate_nucleus.net <- here("data", "caudate_nucleus_top.Rdata")
+if(!file.exists(hum_caudate_nucleus.net)){
+    download.tissue.net(tissue = "caudate_nucleus", organism = "human", project.dir = here("data"))
+}
+
+hum_caudate_putamen.net <- here("data", "caudate_putamen_top.Rdata")
+if(!file.exists(hum_caudate_putamen.net)){
+    download.tissue.net(tissue = "caudate_putamen", organism = "human", project.dir = here("data"))
+}
+
+hum_cerebral_cortex.net <- here("data", "cerebral_cortex_top.Rdata")
+if(!file.exists(hum_cerebral_cortex.net)){
+    download.tissue.net(tissue = "cerebral_cortex", organism = "human", project.dir = here("data"))
+}
+
+hum_corpus_callosum.net <- here("data", "corpus_callosum_top.Rdata")
+if(!file.exists(hum_corpus_callosum.net)){
+    download.tissue.net(tissue = "corpus_callosum", organism = "human", project.dir = here("data"))
+}
+
+hum_corpus_striatum.net <- here("data", "corpus_striatum_top.Rdata")
+if(!file.exists(hum_corpus_striatum.net)){
+    download.tissue.net(tissue = "corpus_striatum", organism = "human", project.dir = here("data"))
+}
+
+hum_dentate_gyrus.net <- here("data", "dentate_gyrus_top.Rdata")
+if(!file.exists(hum_dentate_gyrus.net)){
+    download.tissue.net(tissue = "dentate_gyrus", organism = "human", project.dir = here("data"))
+}
+
+hum_diencephalon.net <- here("data", "diencephalon_top.Rdata")
+if(!file.exists(hum_diencephalon.net)){
+    download.tissue.net(tissue = "diencephalon", organism = "human", project.dir = here("data"))
+}
+
+hum_forebrain.net <- here("data", "forebrain_top.Rdata")
+if(!file.exists(hum_forebrain.net)){
+    download.tissue.net(tissue = "forebrain", organism = "human", project.dir = here("data"))
+}
+
+hum_hypothalamus.net <- here("data", "hypothalamus_top.Rdata")
+if(!file.exists(hum_hypothalamus.net)){
+    download.tissue.net(tissue = "hypothalamus", organism = "human", project.dir = here("data"))
+}
+
+hum_hypophysis.net <- here("data", "hypophysis_top.Rdata")
+if(!file.exists(hum_hypophysis.net)){
+    download.tissue.net(tissue = "hypophysis", organism = "human", project.dir = here("data"))
+}
+
+hum_locus_ceruleus.net <- here("data", "locus_ceruleus_top.Rdata")
+if(!file.exists(hum_locus_ceruleus.net)){
+    download.tissue.net(tissue = "locus_ceruleus", organism = "human", project.dir = here("data"))
+}
+
+hum_medulla_oblongata.net <- here("data", "medulla_oblongata_top.Rdata")
+if(!file.exists(hum_medula_oblongata.net)){
+    download.tissue.net(tissue = "medulla_oblongata", organism = "human", project.dir = here("data"))
+}
+
+hum_midbrain.net <- here("data", "midbrain_top.Rdata")
+if(!file.exists(hum_midbrain.net)){
+    download.tissue.net(tissue = "midbrain", organism = "human", project.dir = here("data"))
+}
+
+hum_occipital_lobe.net <- here("data", "occipital_lobe_top.Rdata")
+if(!file.exists(hum_occipital_lobe.net)){
+    download.tissue.net(tissue = "occipital_lobe", organism = "human", project.dir = here("data"))
+}
+
+hum_pons.net <- here("data", "pons_top.Rdata")
+if(!file.exists(hum_pons.net)){
+    download.tissue.net(tissue = "pons", organism = "human", project.dir = here("data"))
+}
+
+hum_occipital_pole.net <- here("data", "occipital_pole_top.Rdata")
+if(!file.exists(hum_occipital_pole.net)){
+    download.tissue.net(tissue = "occipital_pole", organism = "human", project.dir = here("data"))
+}
+
+hum_substantia_nigra.net <- here("data", "substantia_nigra_top.Rdata")
+if(!file.exists(hum_substantia_nigra.net)){
+    download.tissue.net(tissue = "substantia_nigra", organism = "human", project.dir = here("data"))
+}
+
+hum_subthalamic_nucleus.net <- here("data", "subthalamic_nucleus_top.Rdata")
+if(!file.exists(hum_subthalamic_nucleus.net)){
+    download.tissue.net(tissue = "subthalamic_nucleus", organism = "human", project.dir = here("data"))
+}
+
+hum_telencephalon.net <- here("data", "telencephalon_top.Rdata")
+if(!file.exists(hum_telencephalon.net)){
+    download.tissue.net(tissue = "telencephalon", organism = "human", project.dir = here("data"))
+}
+
+hum_lung.net <- here("data", "lung_top.Rdata")
+if(!file.exists(hum_lung.net)){
+    download.tissue.net(tissue = "lung", organism = "human", project.dir = here("data"))
+}
+```
+
+```{r networks to text files}
+brain_nets <- list.files(here("data"), pattern = "*_top.RData")
+
+for(i in 1:length(brain_nets)){
+  net <- readRDS(here("data", brain_nets[i]))
+  write_delim(net, here("data", paste(str_extract(brain_nets[i], ".+?(?=.RData)"), "txt", sep = ".")), delim = "\t", col_names = FALSE)
+  rm(net)
+}
+
+
+network_formatr(network.dir = here("data"), 
+                net_extension = "lung_top.RData", 
+                edge_threshold = 0.2)
+
+lung <- readRDS(here("data", "lung_top.RData")) %>% 
+  as_tibble()
+
+lung_filt <- lung %>% 
+  filter(V3 > 0.2)
+
+write_delim(lung_filt, here("hb_top_brain_nets", "filt_lung_top.txt"), delim = "\t", col_names = FALSE)
+rm(lung_filt)
+```
+
+```{r read in pvals and change col headers}
+
+hippocampus_volume_pvals <- read_table(here("data", "hipp_genes.genes.out"),
+                                       col_names = TRUE) %>% 
+  mutate(across(starts_with("GENE"), as.character)) %>%
+  mutate(across(starts_with("CHR"), as.character)) %>% 
+  dplyr::select(chromosome = CHR, 
+         start = START, 
+         end  = STOP, 
+         gene_symbol = GENE, 
+         numSnps = NSNPS, 
+         pvalue = P) %>% 
+  mutate(chromosome = paste("chr", .$chromosome, sep = ""))
+
+write_delim(hippocampus_volume_pvals, here("data", "hipp_genes_for_signet.txt"), delim = "\t", col_names = TRUE)
+```
+
+```{r signet run with adni data}
+adni_hippocampal_volume_signet_results_4_nets <- SIGNET(here("data", "hipp_genes_for_signet.txt"),
+                                                        network_dir = here("hb_top_4_brain_nets"),
+                                                        iters = 20000,
+                                                        remove_HLA = TRUE,
+                                                        edge_threshold = 0)
+write_rds(adni_hippocampal_volume_signet_results_4_nets, here("results", "adni_hippocampal_volume_signet_results_4_nets.rds"))
+
+
+adni_hippocampal_volume_signet_results_16_nets <- SIGNET(here("data", "hipp_genes_for_signet.txt"), 
+                                                         network_dir = here("hb_top_brain_nets"),
+                                                         iters = 20000,
+                                                         remove_HLA = TRUE,
+                                                         edge_threshold = 0)
+
+write_rds(adni_hippocampal_volume_signet_results_16_nets, here("results", "adni_hippocampal_volume_signet_results_16_nets.rds"))
+
+```
+
+```{r read_in_and_process_data}
+adni_hippocampal_volume_signet_results_4_nets <- read_rds(here("results", "adni_hippocampal_volume_signet_results_4_nets.rds"))
+adni_hippocampal_volume_signet_results_16_nets <- read_rds(here("results", "adni_hippocampal_volume_signet_results_16_nets.rds"))
+
+
+adni_signet_4_nets_res <- adni_hippocampal_volume_signet_results_4_nets$data %>% 
+  mutate(across(Gene, as.character)) %>% 
+  mutate(logGWASp = -log10(pval),
+         logFDR = -log10(localFDR)) #%>% 
+  #rowwise() %>% 
+  #mutate(comb_score = sum(logGWASp > .$logGWASp & logFDR > .$logFDR)) %>%
+  #ungroup() %>%
+  #mutate(comb_score = comb_score/n())
+
+adni_signet_4_nets_gconvert <- gconvert(adni_signet_4_nets_res$Gene,
+                                        organism = "hsapiens",
+                                        target = "ENTREZGENE",
+                                        numeric_ns = "ENTREZGENE_ACC") %>% 
+  filter(!duplicated(target), !duplicated(name), !duplicated(input)) %>% 
+  as_tibble() %>% 
+  dplyr::select(Gene = input, name) %>% 
+  mutate(across(Gene, as.character))
+
+adni_signet_4_nets_res_genes <- adni_signet_4_nets_res %>% 
+  inner_join(adni_signet_4_nets_gconvert, by = "Gene") %>% 
+  select(gene_name = name, logGWASp, logFDR)
+
+
+adni_signet_16_nets_res <- adni_hippocampal_volume_signet_results_16_nets$data %>% 
+  mutate(across(Gene, as.character)) %>% 
+  mutate(logGWASp = -log10(pval),
+         logFDR = -log10(localFDR)) #%>% 
+  #rowwise() %>% 
+  #mutate(comb_score = sum(logGWASp > .$logGWASp & logFDR > .$logFDR)) %>%
+  #ungroup() %>%
+  #mutate(comb_score = comb_score/n())
+
+adni_signet_16_nets_gconvert <- gconvert(adni_signet_16_nets_res$Gene,
+                                        organism = "hsapiens",
+                                        target = "ENTREZGENE",
+                                        numeric_ns = "ENTREZGENE_ACC") %>% 
+  filter(!duplicated(target), !duplicated(name), !duplicated(input)) %>% 
+  as_tibble() %>% 
+  dplyr::select(Gene = input, name) %>% 
+  mutate(across(Gene, as.character))
+
+adni_signet_16_nets_res_genes <- adni_signet_16_nets_res %>% 
+  inner_join(adni_signet_16_nets_gconvert, by = "Gene") %>% 
+  select(gene_name = name, logGWASp, logFDR)
+
+
+```
+
+```{r gene_comparisons}
+adni_signet_4_nets_gene_comparison_plot <- gene_rank_plotr(score_tab = adni_signet_4_nets_res_genes, 
+                                                           gene_col = "gene_name", 
+                                                           pval_col = "logGWASp",
+                                                           score_comp_col = "logFDR") %>% 
+  layout(
+    title = "Gene Rank by GWAS p-value, Signet FDR,\nand the Combined Ranking of the Two | 4 Networks",
+    legend=list(title=list(text='<b> Combined Score </b>'))
+    )
+write_rds(adni_signet_4_nets_gene_comparison_plot, here("results", "adni_signet_4_nets_gene_comparison_plot.rds"))
+adni_signet_4_nets_gene_comparison_plot <- read_rds(here("results", "adni_signet_4_nets_gene_comparison_plot.rds"))
+
+
+
+adni_signet_16_nets_gene_comparison_plot <- gene_rank_plotr(score_tab = adni_signet_16_nets_res_genes, 
+                                                           gene_col = "gene_name", 
+                                                           pval_col = "logGWASp",
+                                                           score_comp_col = "logFDR") %>% 
+  layout(
+    title = "Gene Rank by GWAS p-value, Signet FDR,\nand the Combined Ranking of the Two | 16 Networks",
+    legend=list(title=list(text='<b> Combined Score </b>'))
+    )
+write_rds(adni_signet_16_nets_gene_comparison_plot, here("results", "adni_signet_16_nets_gene_comparison_plot.rds"))
+adni_signet_16_nets_gene_comparison_plot <- read_rds(here("results", "adni_signet_16_nets_gene_comparison_plot.rds"))
+
+```
+
+
+```{r go_comparisons}
+adni_signet_4_nets_go_comparison_plot <- go_comparison_plotr(score_tab = adni_signet_4_nets_res, gene_col = "Gene", pval_col = "logGWASp", score_comp_col = "logFDR", num_nets = "4")
+
+write_rds(adni_signet_4_nets_go_comparison_plot, here("results", "adni_signet_4_nets_go_comparison_plot.rds"))
+adni_signet_4_nets_go_comparison_plot <- read_rds(here("results", "adni_signet_4_nets_go_comparison_plot.rds"))
+
+adni_signet_16_nets_go_comparison_plot <- go_comparison_plotr(score_tab = adni_signet_16_nets_res, gene_col = "Gene", pval_col = "logGWASp", score_comp_col = "logFDR", num_nets = "16")
+write_rds(adni_signet_16_nets_go_comparison_plot, here("results", "adni_signet_16_nets_go_comparison_plot.rds"))
+adni_signet_16_nets_go_comparison_plot <- read_rds(here("results", "adni_signet_16_nets_go_comparison_plot.rds"))
+```
+
+```{r get disgenet genes}
+ad_disgenet <- disease2gene(disease = "C0002395",
+                            database = "ALL")
+ad_disgenet_results <- ad_disgenet@qresult %>% 
+  select(gene_symbol, score)
+```
+
+```{r roc plotting}
+adni_signet_4_nets_res_genes_comb_score <- adni_signet_4_nets_res_genes %>% 
+  rowwise() %>% 
+  mutate(comb_score = sum(logGWASp > .$logGWASp & logFDR > .$logFDR)) %>%
+  ungroup() %>%
+  mutate(comb_score = comb_score/n())
+
+adni_signet_16_nets_res_genes_comb_score <- adni_signet_16_nets_res_genes %>% 
+  rowwise() %>% 
+  mutate(comb_score = sum(logGWASp > .$logGWASp & logFDR > .$logFDR)) %>%
+  ungroup() %>%
+  mutate(comb_score = comb_score/n())
+
+adni_signet_4_nets_aucs <- auc_plotr(score_tab = adni_signet_4_nets_res_genes_comb_score,
+                                     gene_col = "gene_name",
+                                     pval_col = "logGWASp",
+                                     comp_score_col = "logFDR",
+                                     comb_score_col = "comb_score",
+                                     disgenet_genes = ad_disgenet_results,
+                                     conf_cutoffs = c(0.2, 0.3, 0.4, 0.5),
+                                     title = "SIGNET 4 Net Run AUC Comparison")
+ggsave(here("results", "adni_signet_4_nets_aucs.png"), plot = adni_signet_4_nets_aucs)
+
+adni_signet_16_nets_aucs <- auc_plotr(score_tab = adni_signet_16_nets_res_genes_comb_score,
+                                     gene_col = "gene_name",
+                                     pval_col = "logGWASp",
+                                     comp_score_col = "logFDR",
+                                     comb_score_col = "comb_score",
+                                     disgenet_genes = ad_disgenet_results,
+                                     conf_cutoffs = c(0.2, 0.3, 0.4, 0.5),
+                                     title = "SIGNET 16 Net Run AUC Comparison")
+ggsave(here("results", "adni_signet_16_nets_aucs.png"), plot = adni_signet_16_nets_aucs)
+```
+
+
