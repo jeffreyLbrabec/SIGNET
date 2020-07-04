@@ -198,3 +198,113 @@ adni_signet_16_nets_aucs <- auc_plotr(score_tab = adni_signet_16_nets_res_genes_
 ggsave(here("results", "adni_signet_16_nets_aucs.png"), plot = adni_signet_16_nets_aucs)
 ```
 
+```{r load_MAGMA}
+#Load the MAGMA gene files
+
+#ADNI
+##Hippocampal Volume
+adni_hv_res <- gene_results_formatr(file = here("netwas_results", "adni.Candidate.Gene.Results.csv"),
+                                    gprof_org = "hsapiens",
+                                    gprof_target = "ENTREZGENE",
+                                    gprof_num_ns = "ENTREZGENE_ACC")
+
+#MetaGWAS 
+mwas_res <- gene_results_formatr(file = here("netwas_results", "mwas.Candidate.Gene.Results.csv"),
+                                 gprof_org = "hsapiens",
+                                 gprof_target = "ENTREZGENE",
+                                 gprof_num_ns = "ENTREZGENE_ACC") 
+
+#Imaging Phenotypes
+#P1
+p1_res <- gene_results_formatr(file = here("netwas_results", "p1.Candidate.Gene.Results.csv"),
+                               gprof_org = "hsapiens",
+                               gprof_target = "ENTREZGENE",
+                               gprof_num_ns = "ENTREZGENE_ACC")
+
+#P2
+p2_res <- gene_results_formatr(file = here("netwas_results", "p2.Candidate.Gene.Results.csv"),
+                               gprof_org = "hsapiens",
+                               gprof_target = "ENTREZGENE",
+                               gprof_num_ns = "ENTREZGENE_ACC") 
+
+#P4
+p4_res <- gene_results_formatr(file = here("netwas_results", "p4.Candidate.Gene.Results.csv"),
+                               gprof_org = "hsapiens",
+                               gprof_target = "ENTREZGENE",
+                               gprof_num_ns = "ENTREZGENE_ACC") 
+
+#P9
+p9_res <- gene_results_formatr(file = here("netwas_results", "p9.Candidate.Gene.Results.csv"),
+                               gprof_org = "hsapiens",
+                               gprof_target = "ENTREZGENE",
+                               gprof_num_ns = "ENTREZGENE_ACC") 
+```
+
+```{r netwas_aucs}
+#ADNI
+adni_res_aucs <- auc_plotr(score_tab = adni_hv_res, 
+                           gene_col = "name",
+                           pval_col = "log_p",
+                           comp_score_col = "log_fpr",
+                           comb_score_col = "comb_score",
+                           disgenet_genes = ad_disgenet_results,
+                           conf_cutoffs = c(0.2, 0.3, 0.4, 0.5),
+                           title = "ADNI NetWAS Hippocampal Volume AUCs")
+ggsave(here("results", "adni_res_aucs.png"), plot = adni_res_aucs)
+
+#MWAS
+mwas_res_aucs <- auc_plotr(score_tab = mwas_res, 
+                           gene_col = "name",
+                           pval_col = "log_p",
+                           comp_score_col = "log_fpr",
+                           comb_score_col = "comb_score",
+                           disgenet_genes = ad_disgenet_results,
+                           conf_cutoffs = c(0.2, 0.3, 0.4, 0.5),
+                           title = "MWAS AUCs")
+ggsave(here("results", "mwas_res_aucs.png"), plot = mwas_res_aucs)
+
+#P1
+p1_res_aucs <- auc_plotr(score_tab = p1_res, 
+                         gene_col = "name",
+                         pval_col = "log_p",
+                         comp_score_col = "log_fpr",
+                         comb_score_col = "comb_score",
+                         disgenet_genes = ad_disgenet_results,
+                         conf_cutoffs = c(0.2, 0.3, 0.4),
+                         title = "p1 AUCs")
+ggsave(here("results", "p1_res_aucs.png"), plot = p1_res_aucs)
+
+#P2
+p2_res_aucs <- auc_plotr(score_tab = p2_res, 
+                         gene_col = "name",
+                         pval_col = "log_p",
+                         comp_score_col = "log_fpr",
+                         comb_score_col = "comb_score",
+                         disgenet_genes = ad_disgenet_results,
+                         conf_cutoffs = c(0.2, 0.3, 0.4),
+                         title = "p2 AUCs")
+ggsave(here("results", "p2_res_aucs.png"), plot = p2_res_aucs)
+
+#P4
+p4_res_aucs <- auc_plotr(score_tab = p4_res, 
+                           gene_col = "name",
+                           pval_col = "log_p",
+                           comp_score_col = "log_fpr",
+                           comb_score_col = "comb_score",
+                           disgenet_genes = ad_disgenet_results,
+                           conf_cutoffs = c(0.2, 0.3, 0.4),
+                           title = "p4 AUCs")
+ggsave(here("results", "p4_res_aucs.png"), plot = p4_res_aucs)
+
+#P9
+p9_res_aucs <- auc_plotr(score_tab = p9_res, 
+                           gene_col = "name",
+                           pval_col = "log_p",
+                           comp_score_col = "log_fpr",
+                           comb_score_col = "comb_score",
+                           disgenet_genes = ad_disgenet_results,
+                           conf_cutoffs = c(0.2, 0.3, 0.4),
+                           title = "p9 AUCs")
+ggsave(here("results", "p9_res_aucs.png"), plot = p9_res_aucs)
+```
+

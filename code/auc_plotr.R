@@ -28,8 +28,8 @@ auc_plotr <- function(score_tab = NULL,
     ~AUC, ~conf_score, ~col_type,
     as.numeric(pval_rocs[[1]]$auc), conf_cutoffs[[1]], "pval",
     as.numeric(pval_rocs[[2]]$auc), conf_cutoffs[[2]], "pval",
-    as.numeric(pval_rocs[[3]]$auc), conf_cutoffs[[3]], "pval",
-    as.numeric(pval_rocs[[4]]$auc), conf_cutoffs[[4]], "pval",
+    as.numeric(pval_rocs[[3]]$auc), conf_cutoffs[[3]], "pval"#,
+    #as.numeric(pval_rocs[[4]]$auc), conf_cutoffs[[4]], "pval",
   )
   
   
@@ -51,8 +51,8 @@ auc_plotr <- function(score_tab = NULL,
     ~AUC, ~conf_score, ~col_type,
     as.numeric(comp_score_col_rocs[[1]]$auc), conf_cutoffs[[1]], "comp_score",
     as.numeric(comp_score_col_rocs[[2]]$auc), conf_cutoffs[[2]], "comp_score",
-    as.numeric(comp_score_col_rocs[[3]]$auc), conf_cutoffs[[3]], "comp_score",
-    as.numeric(comp_score_col_rocs[[4]]$auc), conf_cutoffs[[4]], "comp_score",
+    as.numeric(comp_score_col_rocs[[3]]$auc), conf_cutoffs[[3]], "comp_score"#,
+    #as.numeric(comp_score_col_rocs[[4]]$auc), conf_cutoffs[[4]], "comp_score",
   )
   
   
@@ -74,8 +74,8 @@ auc_plotr <- function(score_tab = NULL,
     ~AUC, ~conf_score, ~col_type,
     as.numeric(comb_score_rocs[[1]]$auc), conf_cutoffs[[1]], "comb_score",
     as.numeric(comb_score_rocs[[2]]$auc), conf_cutoffs[[2]], "comb_score",
-    as.numeric(comb_score_rocs[[3]]$auc), conf_cutoffs[[3]], "comb_score",
-    as.numeric(comb_score_rocs[[4]]$auc), conf_cutoffs[[4]], "comb_score",
+    as.numeric(comb_score_rocs[[3]]$auc), conf_cutoffs[[3]], "comb_score"#,
+    #as.numeric(comb_score_rocs[[4]]$auc), conf_cutoffs[[4]], "comb_score",
   )
   
   
